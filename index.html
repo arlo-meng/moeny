@@ -27,10 +27,33 @@
         <button onclick="requestPersist()" class="text-[10px] bg-gray-100 px-2 py-1 rounded text-gray-500">锁定存储</button>
     </header>
 
-    <main class="p-4 max-w-md mx-auto">
-        <section class="bg-white rounded-2xl p-5 shadow-sm mb-6">
-            <div class="mb-4 text-center">
-                <p class="text-gray-400 text-xs mb-1">选定范围内总支出</p>
+    <main class="p-4 max-w-md mx-auto space-y-6">
+        
+        <section class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest">新增记录</h2>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="text-[10px] text-gray-400 ml-1">金额</label>
+                    <input type="number" id="amount" inputmode="decimal" placeholder="0.00" class="w-full text-4xl font-light p-2 border-b border-gray-100 focus:border-blue-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 ml-1">详情备注 (选填)</label>
+                    <input type="text" id="note" placeholder="具体用途..." class="w-full text-sm p-2 border-b border-gray-100 focus:border-blue-500 outline-none transition-all">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-2">
+                <button onclick="addRecord('生理需要（吃喝睡）', 1)" class="w-full p-3 text-white rounded-xl bg-emerald-500 text-sm font-medium active:scale-95 transition-transform">生理需要（吃喝睡）</button>
+                <button onclick="addRecord('安全需要（健康保障、工作保障）', 2)" class="w-full p-3 text-white rounded-xl bg-blue-500 text-sm font-medium active:scale-95 transition-transform">安全需要（健康保障、工作保障）</button>
+                <button onclick="addRecord('情感与归属（友情、爱情、亲情）', 3)" class="w-full p-3 text-white rounded-xl bg-pink-500 text-sm font-medium active:scale-95 transition-transform">情感与归属（友情、爱情、亲情）</button>
+                <button onclick="addRecord('尊重（自我尊重、被他人尊重）', 4)" class="w-full p-3 text-white rounded-xl bg-violet-500 text-sm font-medium active:scale-95 transition-transform">尊重（自我尊重、被他人尊重）</button>
+                <button onclick="addRecord('自我实现（求知、审美、实现自我）', 5)" class="w-full p-3 text-white rounded-xl bg-amber-500 text-sm font-medium active:scale-95 transition-transform">自我实现（求知、审美、实现自我）</button>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div class="mb-4 text-center border-b border-gray-50 pb-4">
+                <p class="text-gray-400 text-xs mb-1">选定范围总支出</p>
                 <p class="text-4xl font-black text-gray-900" id="totalAmount">¥0.00</p>
             </div>
 
@@ -62,39 +85,18 @@
             <div id="categoryBreakdown" class="space-y-4"></div>
         </section>
 
-        <section class="bg-white rounded-2xl p-5 shadow-sm mb-6">
-            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest">新增支出</h2>
-            <div class="space-y-4 mb-6">
-                <div>
-                    <label class="text-[10px] text-gray-400 ml-1">金额</label>
-                    <input type="number" id="amount" inputmode="decimal" placeholder="0.00" class="w-full text-4xl font-light p-2 border-b border-gray-100 focus:border-blue-500 outline-none transition-all">
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-400 ml-1">详情 (选填)</label>
-                    <input type="text" id="note" placeholder="这笔钱花在哪里了？" class="w-full text-sm p-2 border-b border-gray-100 focus:border-blue-500 outline-none transition-all">
-                </div>
-            </div>
-            
-            <div class="flex flex-col gap-2">
-                <button onclick="addRecord('生理需要（吃喝睡）', 1)" class="w-full p-3 text-white rounded-xl bg-emerald-500 text-sm font-medium active:opacity-80">生理需要（吃喝睡）</button>
-                <button onclick="addRecord('安全需要（健康保障、工作保障）', 2)" class="w-full p-3 text-white rounded-xl bg-blue-500 text-sm font-medium active:opacity-80">安全需要（健康保障、工作保障）</button>
-                <button onclick="addRecord('情感与归属（友情、爱情、亲情）', 3)" class="w-full p-3 text-white rounded-xl bg-pink-500 text-sm font-medium active:opacity-80">情感与归属（友情、爱情、亲情）</button>
-                <button onclick="addRecord('尊重（自我尊重、被他人尊重）', 4)" class="w-full p-3 text-white rounded-xl bg-violet-500 text-sm font-medium active:opacity-80">尊重（自我尊重、被他人尊重）</button>
-                <button onclick="addRecord('自我实现（求知、审美、实现自我）', 5)" class="w-full p-3 text-white rounded-xl bg-amber-500 text-sm font-medium active:opacity-80">自我实现（求知、审美、实现自我）</button>
-            </div>
-        </section>
-
         <section>
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 px-1">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest">最近流水</h2>
-                <button onclick="exportCSV()" class="text-xs text-blue-500">导出 CSV</button>
+                <button onclick="exportCSV()" class="text-xs text-blue-500 bg-blue-50 px-2 py-1 rounded">导出 CSV</button>
             </div>
             <div id="historyList" class="space-y-3"></div>
         </section>
+
     </main>
 
     <script>
-        // 核心数据模型升级：增加 note 字段
+        // 数据持久化
         let records = JSON.parse(localStorage.getItem('my_expenses_v3') || '[]');
         const categories = [
             '生理需要（吃喝睡）',
@@ -104,11 +106,10 @@
             '自我实现（求知、审美、实现自我）'
         ];
 
-        // 尝试申请持久化存储（防止浏览器自动清理）
         async function requestPersist() {
             if (navigator.storage && navigator.storage.persist) {
                 const isPersisted = await navigator.storage.persist();
-                alert(isPersisted ? "已开启持久化存储，数据更安全。" : "持久化申请被拒，请手动定期备份。");
+                alert(isPersisted ? "持久化存储已锁定，数据更安全。" : "持久化申请未成功，请定期备份。");
             }
         }
 
@@ -129,15 +130,13 @@
                 id: Date.now(),
                 amount: val,
                 category: catName,
-                note: noteInput.value.trim(), // 详情字段
+                note: noteInput.value.trim(),
                 colorId: colorId,
                 time: new Date().toISOString()
             };
 
             records.unshift(record);
             localStorage.setItem('my_expenses_v3', JSON.stringify(records));
-            
-            // 清空输入
             amtInput.value = '';
             noteInput.value = '';
             renderData();
@@ -150,8 +149,6 @@
             const breakdownEl = document.getElementById('categoryBreakdown');
             
             let filtered = [];
-
-            // 时间过滤
             if (type === 'all') {
                 filtered = records;
             } else if (type === 'month') {
@@ -166,7 +163,6 @@
                 });
             }
 
-            // 更新月份下拉
             const months = [...new Set(records.map(r => r.time.substring(0, 7)))].sort().reverse();
             const monthSelect = document.getElementById('filterMonth');
             const currentMonthVal = monthSelect.value;
@@ -182,22 +178,21 @@
                 if (stats[r.category]) stats[r.category].sum += r.amount;
 
                 const d = new Date(r.time);
-                // 详情展示逻辑：如果有备注则显示，没有则隐藏
                 const noteHtml = r.note ? `<p class="text-sm text-gray-600 my-1 bg-gray-50 p-2 rounded">${r.note}</p>` : '';
                 
                 historyList.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-color-${r.colorId}">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-color-${r.colorId} transition-all active:bg-gray-50">
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="font-black text-lg text-gray-800">¥${r.amount.toFixed(2)}</p>
-                                <p class="text-[10px] text-gray-400">${r.category}</p>
+                                <p class="text-[10px] text-gray-400 font-medium">${r.category}</p>
                             </div>
-                            <button onclick="deleteRecord(${r.id})" class="text-gray-200 hover:text-red-400">
+                            <button onclick="deleteRecord(${r.id})" class="text-gray-200 hover:text-red-400 p-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
                         </div>
                         ${noteHtml}
-                        <p class="text-[10px] text-gray-300 mt-1 text-right">${d.toLocaleDateString()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</p>
+                        <p class="text-[9px] text-gray-300 mt-2 text-right">${d.toLocaleDateString()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</p>
                     </div>
                 `;
             });
@@ -211,12 +206,12 @@
                     const percent = total > 0 ? (item.sum / total * 100).toFixed(1) : 0;
                     breakdownEl.innerHTML += `
                         <div class="space-y-1">
-                            <div class="flex justify-between text-[11px]">
-                                <span class="text-gray-500">${cat}</span>
-                                <span class="text-gray-900 font-bold">¥${item.sum.toFixed(2)} (${percent}%)</span>
+                            <div class="flex justify-between text-[11px] items-end">
+                                <span class="text-gray-500 leading-none">${cat}</span>
+                                <span class="text-gray-900 font-bold leading-none">¥${item.sum.toFixed(2)} (${percent}%)</span>
                             </div>
                             <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full bar-color-${item.id}" style="width: ${percent}%"></div>
+                                <div class="h-full bar-color-${item.id} transition-all duration-500" style="width: ${percent}%"></div>
                             </div>
                         </div>
                     `;
@@ -244,8 +239,10 @@
             link.click();
         }
 
-        document.getElementById('startDate').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-        document.getElementById('endDate').value = new Date().toISOString().split('T')[0];
+        // 设置默认筛选区间为本月
+        const now = new Date();
+        document.getElementById('startDate').value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        document.getElementById('endDate').value = now.toISOString().split('T')[0];
 
         renderData();
     </script>
