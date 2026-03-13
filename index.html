@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>记账</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bar-color-1 { background-color: #10b981; }
+        .bar-color-2 { background-color: #3b82f6; }
+        .bar-color-3 { background-color: #ec4899; }
+        .bar-color-4 { background-color: #8b5cf6; }
+        .bar-color-5 { background-color: #f59e0b; }
+        
+        .border-color-1 { border-left-color: #10b981; }
+        .border-color-2 { border-left-color: #3b82f6; }
+        .border-color-3 { border-left-color: #ec4899; }
+        .border-color-4 { border-left-color: #8b5cf6; }
+        .border-color-5 { border-left-color: #f59e0b; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-20 font-sans">
+
+    <header class="bg-white shadow-sm p-4 sticky top-0 z-20 flex justify-between items-center">
+        <div class="w-10"></div>
+        <h1 class="text-xl font-bold text-gray-800">记账</h1>
+        <button onclick="requestPersist()" class="text-[10px] bg-gray-100 px-2 py-1 rounded text-gray-500">锁定存储</button>
+    </header>
+
+    <main class="p-4 max-w-md mx-auto">
+        <section class="bg-white rounded-2xl p-5 shadow-sm mb-6">
+            <div class="mb-4 text-center">
+                <p class="text-gray-400 text-xs mb-1">选定范围内总支出</p>
+                <p class="text-4xl font-black text-gray-900" id="totalAmount">¥0.00</p>
+            </div>
+
+            <div class="space-y-3 mb-6 bg-gray-50 p-3 rounded-xl">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 w-12">维度:</span>
+                    <select id="filterType" onchange="toggleFilterUI()" class="flex-1 bg-white border border-gray-200 text-sm rounded-lg p-1">
+                        <option value="all">所有时间</option>
+                        <option value="month">按月查看</option>
+                        <option value="range">自定义区间</option>
+                    </select>
+                </div>
+                <div id="monthFilterWrapper" class="hidden flex items-center gap-2">
+                    <span class="text-xs text-gray-400 w-12">选择:</span>
+                    <select id="filterMonth" onchange="renderData()" class="flex-1 bg-white border border-gray-200 text-sm rounded-lg p-1"></select>
+                </div>
+                <div id="rangeFilterWrapper" class="hidden space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-12">从:</span>
+                        <input type="date" id="startDate" onchange="renderData()" class="flex-1 bg-white border border-gray-200 text-sm rounded-lg p-1">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-12">至:</span>
+                        <input type="date" id="endDate" onchange="renderData()" class="flex-1 bg-white border border-gray-200 text-sm rounded-lg p-1">
+                    </div>
+                </div>
+            </div>
+
+            <div id="categoryBreakdown" class="space-y-4"></div>
+        </section>
+
+        <section class="bg-white rounded-2xl p-5 shadow-sm mb-6">
+            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest">新增支出</h2>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="text-[10px] text-gray-400 ml-1">金额</label>
+                    <input type="number" id="amount" inputmode="decimal" placeholder="0.00" class="w-full text-4xl font-light p-2 border-b border-gray-100 focus:border-blue-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 ml-1">详情 (选填)</label>
+                    <input type="text" id="note" placeholder="这笔钱花在哪里了？" class="w-full text-sm p-2 border-b border-gray-100 focus:border-blue-500 outline-none transition-all">
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <button onclick="addRecord('生理需要（吃喝睡）', 1)" class="w-full p-3 text-white rounded-xl bg-emerald-500 text-sm font-medium active:opacity-80">生理需要（吃喝睡）</button>
+                <button onclick="addRecord('安全需要（健康保障、工作保障）', 2)" class="w-full p-3 text-white rounded-xl bg-blue-500 text-sm font-medium active:opacity-80">安全需要（健康保障、工作保障）</button>
+                <button onclick="addRecord('情感与归属（友情、爱情、亲情）', 3)" class="w-full p-3 text-white rounded-xl bg-pink-500 text-sm font-medium active:opacity-80">情感与归属（友情、爱情、亲情）</button>
+                <button onclick="addRecord('尊重（自我尊重、被他人尊重）', 4)" class="w-full p-3 text-white rounded-xl bg-violet-500 text-sm font-medium active:opacity-80">尊重（自我尊重、被他人尊重）</button>
+                <button onclick="addRecord('自我实现（求知、审美、实现自我）', 5)" class="w-full p-3 text-white rounded-xl bg-amber-500 text-sm font-medium active:opacity-80">自我实现（求知、审美、实现自我）</button>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest">最近流水</h2>
+                <button onclick="exportCSV()" class="text-xs text-blue-500">导出 CSV</button>
+            </div>
+            <div id="historyList" class="space-y-3"></div>
+        </section>
+    </main>
+
+    <script>
+        // 核心数据模型升级：增加 note 字段
+        let records = JSON.parse(localStorage.getItem('my_expenses_v3') || '[]');
+        const categories = [
+            '生理需要（吃喝睡）',
+            '安全需要（健康保障、工作保障）',
+            '情感与归属（友情、爱情、亲情）',
+            '尊重（自我尊重、被他人尊重）',
+            '自我实现（求知、审美、实现自我）'
+        ];
+
+        // 尝试申请持久化存储（防止浏览器自动清理）
+        async function requestPersist() {
+            if (navigator.storage && navigator.storage.persist) {
+                const isPersisted = await navigator.storage.persist();
+                alert(isPersisted ? "已开启持久化存储，数据更安全。" : "持久化申请被拒，请手动定期备份。");
+            }
+        }
+
+        function toggleFilterUI() {
+            const type = document.getElementById('filterType').value;
+            document.getElementById('monthFilterWrapper').classList.toggle('hidden', type !== 'month');
+            document.getElementById('rangeFilterWrapper').classList.toggle('hidden', type !== 'range');
+            renderData();
+        }
+
+        function addRecord(catName, colorId) {
+            const amtInput = document.getElementById('amount');
+            const noteInput = document.getElementById('note');
+            const val = parseFloat(amtInput.value);
+            if (!val || val <= 0) return;
+
+            const record = {
+                id: Date.now(),
+                amount: val,
+                category: catName,
+                note: noteInput.value.trim(), // 详情字段
+                colorId: colorId,
+                time: new Date().toISOString()
+            };
+
+            records.unshift(record);
+            localStorage.setItem('my_expenses_v3', JSON.stringify(records));
+            
+            // 清空输入
+            amtInput.value = '';
+            noteInput.value = '';
+            renderData();
+        }
+
+        function renderData() {
+            const type = document.getElementById('filterType').value;
+            const historyList = document.getElementById('historyList');
+            const totalEl = document.getElementById('totalAmount');
+            const breakdownEl = document.getElementById('categoryBreakdown');
+            
+            let filtered = [];
+
+            // 时间过滤
+            if (type === 'all') {
+                filtered = records;
+            } else if (type === 'month') {
+                const target = document.getElementById('filterMonth').value;
+                filtered = records.filter(r => r.time.startsWith(target));
+            } else if (type === 'range') {
+                const start = document.getElementById('startDate').value;
+                const end = document.getElementById('endDate').value;
+                filtered = records.filter(r => {
+                    const rDate = r.time.split('T')[0];
+                    return (!start || rDate >= start) && (!end || rDate <= end);
+                });
+            }
+
+            // 更新月份下拉
+            const months = [...new Set(records.map(r => r.time.substring(0, 7)))].sort().reverse();
+            const monthSelect = document.getElementById('filterMonth');
+            const currentMonthVal = monthSelect.value;
+            monthSelect.innerHTML = months.map(m => `<option value="${m}" ${m===currentMonthVal?'selected':''}>${m}</option>`).join('');
+
+            let total = 0;
+            let stats = {};
+            categories.forEach((cat, index) => stats[cat] = { sum: 0, id: index + 1 });
+
+            historyList.innerHTML = '';
+            filtered.forEach(r => {
+                total += r.amount;
+                if (stats[r.category]) stats[r.category].sum += r.amount;
+
+                const d = new Date(r.time);
+                // 详情展示逻辑：如果有备注则显示，没有则隐藏
+                const noteHtml = r.note ? `<p class="text-sm text-gray-600 my-1 bg-gray-50 p-2 rounded">${r.note}</p>` : '';
+                
+                historyList.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-color-${r.colorId}">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-black text-lg text-gray-800">¥${r.amount.toFixed(2)}</p>
+                                <p class="text-[10px] text-gray-400">${r.category}</p>
+                            </div>
+                            <button onclick="deleteRecord(${r.id})" class="text-gray-200 hover:text-red-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </div>
+                        ${noteHtml}
+                        <p class="text-[10px] text-gray-300 mt-1 text-right">${d.toLocaleDateString()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</p>
+                    </div>
+                `;
+            });
+
+            totalEl.innerText = `¥${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+
+            breakdownEl.innerHTML = '';
+            categories.forEach(cat => {
+                const item = stats[cat];
+                if (item.sum > 0 || type === 'all') {
+                    const percent = total > 0 ? (item.sum / total * 100).toFixed(1) : 0;
+                    breakdownEl.innerHTML += `
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px]">
+                                <span class="text-gray-500">${cat}</span>
+                                <span class="text-gray-900 font-bold">¥${item.sum.toFixed(2)} (${percent}%)</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bar-color-${item.id}" style="width: ${percent}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function deleteRecord(id) {
+            if(confirm('确认删除？')) {
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem('my_expenses_v3', JSON.stringify(records));
+                renderData();
+            }
+        }
+
+        function exportCSV() {
+            let csv = '\uFEFF时间,金额,分类,备注\n';
+            records.forEach(r => {
+                csv += `${r.time.replace('T',' ').substring(0,19)},${r.amount},"${r.category}","${r.note || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `账本_${new Date().toISOString().split('T')[0]}.csv`);
+            link.click();
+        }
+
+        document.getElementById('startDate').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+        document.getElementById('endDate').value = new Date().toISOString().split('T')[0];
+
+        renderData();
+    </script>
+</body>
+</html>
